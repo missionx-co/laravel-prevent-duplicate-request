@@ -50,7 +50,9 @@ class PreventDuplicateRequestMiddleware
 
     public function terminate(Request $request, Response $response): void
     {
-        $this->lock->release();
+        if (isset($this->lock)) {
+            $this->lock->release();
+        }
     }
 
     protected function generateKey(Request $request): string

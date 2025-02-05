@@ -1,6 +1,6 @@
 {
     "name": "missionx-co/laravel-prevent-duplicate-request",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "A Laravel package that prevents duplicate API requests using Idempotency keys or dynamically generated keys based on request URL and input.",
     "keywords": [
         "MissionX",

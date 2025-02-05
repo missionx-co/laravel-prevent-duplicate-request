@@ -29,18 +29,17 @@ class PreventDuplicateRequestMiddleware
             return $next($request);
         }
 
-        $config = config('prevent-duplicate-request');
-        $maxWaitTime ??= $config['max_lock_wait_time'];
+        $maxWaitTime ??= config('prevent-duplicate-request.max_lock_wait_time');
 
         $key = $this->generateKey($request);
+
+        $this->lock = $this->store()->lock($key . '_lock', $maxWaitTime);
+
+        $this->lock->block($maxWaitTime);
 
         if ($this->store()->has($key)) {
             return $this->buildResponseFromCache($request, $this->store()->get($key));
         }
-
-        $this->lock = $this->store()->lock($key.'_lock', $maxWaitTime);
-
-        $this->lock->block($maxWaitTime);
 
         $response = $next($request);
         $this->saveResponseInCache($key, $request, $response);
@@ -64,7 +63,7 @@ class PreventDuplicateRequestMiddleware
 
         $userId = $this->resolveUserId($request);
 
-        return config('prevent-duplicate-request.cache_prefix').'_'.$userId.'_'.$key;
+        return config('prevent-duplicate-request.cache_prefix') . '_' . $userId . '_' . $key;
     }
 
     protected function resolveUserId(Request $request)
@@ -108,11 +107,11 @@ class PreventDuplicateRequestMiddleware
 
     protected function store(): Repository
     {
-        return once(fn () => Cache::store(config('prevent-duplicate-request.cache_store')));
+        return once(fn() => Cache::store(config('prevent-duplicate-request.cache_store')));
     }
 
     protected function algorithm(): UniqueKeyAlgorithm
     {
-        return once(fn () => app(config('prevent-duplicate-request.key_algorithm')));
+        return once(fn() => app(config('prevent-duplicate-request.key_algorithm')));
     }
 }

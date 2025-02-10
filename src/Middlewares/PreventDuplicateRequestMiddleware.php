@@ -88,7 +88,7 @@ class PreventDuplicateRequestMiddleware
             'headers' => $response->headers->all(),
         ];
 
-        $this->store()->put($key, $data);
+        $this->store()->put($key, $data, config('prevent-duplicate-request.cache_duration'));
     }
 
     public function buildResponseFromCache(Request $request, array $responseInCache)

@@ -24,6 +24,8 @@ return [
 
     'cache_duration' => 1800, // 30 minutes in seconds
 
+    'cache_tags' => 'laravel_prevent_duplicate_requests',
+
     // When a race condition happens, we create a cache lock. How long should the lock persist?
     'max_lock_wait_time' => 10,
 ];

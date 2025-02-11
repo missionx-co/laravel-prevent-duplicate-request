@@ -33,12 +33,12 @@ class PreventDuplicateRequestMiddleware
 
         $key = $this->generateKey($request);
 
-        $this->lock = $this->store()->lock($key . '_lock', $maxWaitTime);
+        $this->lock = $this->cache()->lock($key . '_lock', $maxWaitTime);
 
         $this->lock->block($maxWaitTime);
 
-        if ($this->store()->has($key)) {
-            return $this->buildResponseFromCache($request, $this->store()->get($key));
+        if ($response = $this->store()->get($key)) {
+            return $this->buildResponseFromCache($request, $response);
         }
 
         $response = $next($request);
@@ -105,9 +105,16 @@ class PreventDuplicateRequestMiddleware
         return $response;
     }
 
-    protected function store(): Repository
+    protected function cache(): Repository
     {
         return once(fn() => Cache::store(config('prevent-duplicate-request.cache_store')));
+    }
+
+    protected function store(): Repository
+    {
+        return once(
+            fn() => $this->cache()->tags(config('prevent-duplicate-request.cache_tags'))
+        );
     }
 
     protected function algorithm(): UniqueKeyAlgorithm
